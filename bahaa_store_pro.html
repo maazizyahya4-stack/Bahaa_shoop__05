@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>Bahaa Store</title>
+
+<style>
+body{
+margin:0;
+font-family:Helvetica, Arial, sans-serif;
+background:#fff;
+direction:rtl;
+}
+
+/* Header */
+header{
+background:white;
+padding:20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+border-bottom:1px solid #eee;
+font-size:22px;
+font-weight:bold;
+}
+
+.cart-btn{
+cursor:pointer;
+padding:10px 20px;
+border:1px solid black;
+}
+
+/* Admin panel */
+.admin{
+padding:20px;
+background:#f8f8f8;
+text-align:center;
+}
+
+input{
+padding:12px;
+margin:5px;
+border:1px solid #ddd;
+}
+
+button{
+padding:12px 20px;
+border:none;
+background:black;
+color:white;
+cursor:pointer;
+}
+
+/* Products */
+.container{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+padding:40px;
+}
+
+.product{
+text-align:center;
+}
+
+.product img{
+width:100%;
+height:320px;
+object-fit:cover;
+}
+
+.price{
+margin:10px 0;
+font-weight:bold;
+}
+
+/* Cart */
+.cart{
+position:fixed;
+top:0;
+right:-400px;
+width:350px;
+height:100%;
+background:white;
+box-shadow:-5px 0 10px rgba(0,0,0,0.1);
+padding:20px;
+transition:.3s;
+overflow:auto;
+}
+
+.cart.open{
+right:0;
+}
+
+.cart-item{
+display:flex;
+justify-content:space-between;
+margin:10px 0;
+border-bottom:1px solid #eee;
+padding-bottom:10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div>Bahaa Store</div>
+<div class="cart-btn" onclick="toggleCart()">🛒 السلة (<span id="count">0</span>)</div>
+</header>
+
+<div class="admin">
+<h3>إضافة منتج</h3>
+<input id="name" placeholder="اسم المنتج">
+<input id="price" placeholder="السعر">
+<input id="image" placeholder="رابط الصورة">
+<button onclick="addProduct()">إضافة</button>
+</div>
+
+<div class="container" id="products"></div>
+
+<div class="cart" id="cart">
+<h2>سلة المشتريات</h2>
+<div id="cartItems"></div>
+<h3>المجموع: <span id="total">0</span> دج</h3>
+</div>
+
+<script>
+let products = JSON.parse(localStorage.getItem("products")) || [];
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function save(){
+localStorage.setItem("products",JSON.stringify(products));
+localStorage.setItem("cart",JSON.stringify(cart));
+}
+
+function renderProducts(){
+let container=document.getElementById("products");
+container.innerHTML="";
+products.forEach((p,i)=>{
+container.innerHTML+=`
+<div class="product">
+<img src="${p.image}">
+<h3>${p.name}</h3>
+<div class="price">${p.price} دج</div>
+<button onclick="addToCart(${i})">أضف للسلة</button>
+</div>`;
+});
+}
+
+function addProduct(){
+let name=document.getElementById("name").value;
+let price=document.getElementById("price").value;
+let image=document.getElementById("image").value;
+
+if(!name||!price||!image){alert("املأ الحقول");return;}
+
+products.push({name,price,image});
+save();
+renderProducts();
+}
+
+function addToCart(index){
+cart.push(products[index]);
+save();
+renderCart();
+}
+
+function renderCart(){
+let items=document.getElementById("cartItems");
+let total=0;
+items.innerHTML="";
+cart.forEach((item,i)=>{
+total+=parseInt(item.price);
+items.innerHTML+=`
+<div class="cart-item">
+<span>${item.name}</span>
+<span>${item.price} دج</span>
+</div>`;
+});
+document.getElementById("total").textContent=total;
+document.getElementById("count").textContent=cart.length;
+}
+
+function toggleCart(){
+document.getElementById("cart").classList.toggle("open");
+}
+
+renderProducts();
+renderCart();
+</script>
+
+</body>
+</html>
